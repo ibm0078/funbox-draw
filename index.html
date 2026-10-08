@@ -556,8 +556,10 @@
   var POS_KEY = "funbox_draw_pos_v1";
 
   function getCode(product) {
-    var m = product.match(/^(\S+)/);
-    return m ? m[1] : product;
+    var m = product.match(/^([A-Za-z]+-\d+)/);
+    if (m) return m[1].toUpperCase();
+    var m2 = product.match(/^(\S+)/);
+    return m2 ? m2[1] : product;
   }
 
   // Flatten into a single ordered queue of draws.
