@@ -520,7 +520,7 @@
     </div>
     <div class="ticket-stub">
       <div class="stub-count">第<b id="curIndex">–</b>抽</div>
-      <a class="btn-primary" id="openBtn" target="_blank" rel="noopener noreferrer">🔗 開啟這抽</a>
+      <a class="btn-primary" id="openBtn" target="_blank">🔗 開啟這抽</a>
     </div>
   </div>
   <div class="actions-row">
@@ -691,12 +691,23 @@
     render();
   });
 
+  function openAndAutoClose(url) {
+    var win = window.open(url, "_blank");
+    if (win) {
+      setTimeout(function () {
+        try { win.close(); } catch (e) {}
+      }, 1200);
+    }
+  }
+
   var openBtn = document.getElementById("openBtn");
-  openBtn.addEventListener("click", function () {
+  openBtn.addEventListener("click", function (e) {
+    e.preventDefault();
     var q = currentQueue();
     var idx = clampPos(q);
     var d = q[idx];
     if (!d) return;
+    openAndAutoClose(d.url);
     markDrawn(d.url, true);
     if (idx < q.length - 1) state.pos = idx + 1;
     persistPos();
@@ -835,10 +846,10 @@
           var btn = document.createElement("a");
           btn.className = "row-draw-btn";
           btn.href = p.url;
-          btn.target = "_blank";
-          btn.rel = "noopener noreferrer";
           btn.textContent = "單抽";
-          btn.addEventListener("click", function () {
+          btn.addEventListener("click", function (e) {
+            e.preventDefault();
+            openAndAutoClose(p.url);
             markDrawn(p.url, true);
             advanceQueueTo(p.url);
             setTimeout(function () { render(); buildDirectory(); }, 30);
