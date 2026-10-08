@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+
+<meta charset="UTF-8" />
+<title>連抽陀螺券</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #f3efe4;
+    --paper-raised: #fbf9f3;
+    --ink: #1c1a17;
+    --ink-soft: #6b6459;
+    --line: #d9d0bc;
+    --ember: #ff4d1c;
+    --ember-ink: #ffffff;
+    --steel: #2f6690;
+    --gold: #b9791c;
+    --shadow: 220 30% 10%;
+    --focus: #1c1a17;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #18191b;
+      --paper-raised: #212327;
+      --ink: #ece7da;
+      --ink-soft: #96907f;
+      --line: #35363a;
+      --ember: #ff6a3c;
+      --ember-ink: #1a1000;
+      --steel: #6fb2dd;
+      --gold: #e0a94f;
+      --focus: #ece7da;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #18191b;
+    --paper-raised: #212327;
+    --ink: #ece7da;
+    --ink-soft: #96907f;
+    --line: #35363a;
+    --ember: #ff6a3c;
+    --ember-ink: #1a1000;
+    --steel: #6fb2dd;
+    --gold: #e0a94f;
+    --focus: #ece7da;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .display {
+    font-family: "Chakra Petch", "Noto Sans TC", sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 28px 18px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .eyebrow {
+    font-family: "Chakra Petch", sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ember);
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: "Chakra Petch", sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.6rem, 5vw, 2.1rem);
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  .sub {
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    max-width: 60ch;
+  }
+
+  /* ---------- Progress bar ---------- */
+  .progress-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+
+  .progress-row strong {
+    font-family: "Chakra Petch", sans-serif;
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+
+  .progress-track {
+    height: 8px;
+    border-radius: 5px;
+    background: var(--line);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--ember));
+    border-radius: 5px;
+    transition: width 0.35s ease;
+  }
+
+  /* ---------- Filter chips ---------- */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    font-family: "Chakra Petch", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 7px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .chip[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .chip.only-ux21[aria-pressed="true"] {
+    background: var(--ember);
+    border-color: var(--ember);
+    color: var(--ember-ink);
+  }
+
+  .chip:focus-visible, button:focus-visible, summary:focus-visible, a:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Ticket ---------- */
+  .ticket {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px -18px hsl(var(--shadow) / 0.6);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ticket::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: calc(100% - 152px);
+    width: 0;
+    border-left: 2px dashed var(--line);
+  }
+
+  .ticket-main {
+    padding: 22px 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .ticket-region {
+    font-family: "Chakra Petch", sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--steel);
+    font-weight: 600;
+  }
+
+  .ticket-store {
+    font-family: "Chakra Petch", sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-wrap: balance;
+  }
+
+  .ticket-product {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .ticket-price {
+    font-family: "Chakra Petch", sans-serif;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .ticket-empty {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    padding: 10px 0 4px;
+  }
+
+  .ticket-stub {
+    width: 152px;
+    flex-shrink: 0;
+    padding: 22px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .stub-count {
+    font-family: "Chakra Petch", sans-serif;
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+  }
+
+  .stub-count b {
+    display: block;
+    font-size: 1.5rem;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+
+  .btn-primary, .btn-secondary {
+    font-family: "Chakra Petch", sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    border-radius: 9px;
+    padding: 11px 12px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .btn-primary {
+    background: var(--ember);
+    color: var(--ember-ink);
+  }
+
+  .btn-primary:active { transform: translateY(1px); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    font-weight: 500;
+    font-size: 0.78rem;
+  }
+
+  .actions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .actions-row .btn-secondary { width: auto; flex: 1; }
+
+  /* ---------- Directory ---------- */
+  .directory h2 {
+    font-family: "Chakra Petch", sans-serif;
+    font-size: 1.05rem;
+    margin: 0 0 10px;
+  }
+
+  .directory-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .search-input {
+    flex: 1 1 200px;
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 0.88rem;
+    padding: 9px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+
+  .search-input::placeholder { color: var(--ink-soft); }
+
+  .search-input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+  .hide-drawn-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  details.city {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    background: var(--paper-raised);
+  }
+
+  details.city > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: "Chakra Petch", sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  details.city > summary::-webkit-details-marker { display: none; }
+
+  .city-meta {
+    font-size: 0.76rem;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  .city-body { padding: 0 14px 12px; }
+
+  details.store {
+    border-top: 1px solid var(--line);
+    padding: 8px 0;
+  }
+
+  details.store:first-child { border-top: none; }
+
+  details.store > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 4px 2px;
+  }
+
+  details.store > summary::-webkit-details-marker { display: none; }
+
+  .store-meta { color: var(--ink-soft); font-size: 0.78rem; }
+
+  ul.items {
+    list-style: none;
+    margin: 6px 0 2px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  ul.items li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: 7px;
+  }
+
+  ul.items li:hover { background: var(--line); }
+
+  ul.items li .row-check {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--ember);
+    cursor: pointer;
+  }
+
+  ul.items li .row-label {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.86rem;
+    color: var(--ink);
+    overflow-wrap: break-word;
+  }
+
+  ul.items li.drawn .row-label { color: var(--ink-soft); text-decoration: line-through; }
+
+  ul.items li .row-price { color: var(--gold); flex-shrink: 0; font-family: "Chakra Petch", sans-serif; font-size: 0.86rem; }
+  ul.items li.drawn .row-price { color: var(--ink-soft); }
+
+  ul.items li .row-draw-btn {
+    flex-shrink: 0;
+    font-family: "Chakra Petch", sans-serif;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--ember);
+    color: var(--ember-ink);
+    text-decoration: none;
+  }
+
+  ul.items li.drawn .row-draw-btn { background: var(--line); color: var(--ink-soft); }
+
+  footer {
+    color: var(--ink-soft);
+    font-size: 0.76rem;
+    text-align: center;
+    padding-top: 6px;
+  }
+
+  footer a { color: var(--steel); }
+
+  @media (max-width: 480px) {
+    .ticket { grid-template-columns: 1fr; }
+    .ticket::before { display: none; }
+    .ticket-stub {
+      width: auto;
+      border-top: 2px dashed var(--line);
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    .stub-count { text-align: left; }
+    .stub-count b { font-size: 1.2rem; }
+    .ticket-stub .btn-primary { flex-basis: 100%; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">FUNBOX × BEYBLADE X 抽選券</div>
+    <h1>連抽陀螺券</h1>
+    <p class="sub">把全台 Funbox / 來玩聚 10/8–10/9 抽選連結串起來，點一次開一張，抽完自動接下一張。資料來自各店官方 LINE 連結，進度只存在你自己的瀏覽器裡。</p>
+  </header>
+
+  <div class="progress-block">
+    <div class="progress-row">
+      <span>已開 <strong id="drawnCount">0</strong> / <span id="totalCount">0</span> 抽</span>
+      <span id="filterLabel">全部</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="filters" id="cityFilters" role="group" aria-label="依縣市篩選"></div>
+  <div class="filters" id="itemFilters" role="group" aria-label="依品項篩選"></div>
+  <div class="filters">
+    <button class="chip" id="resetBtn">↺ 重設進度</button>
+  </div>
+
+  <div class="ticket" id="ticket">
+    <div class="ticket-main">
+      <div class="ticket-region" id="curRegion">—</div>
+      <div class="ticket-store" id="curStore">載入中…</div>
+      <div class="ticket-product" id="curProduct"></div>
+    </div>
+    <div class="ticket-stub">
+      <div class="stub-count">第<b id="curIndex">–</b>抽</div>
+      <a class="btn-primary" id="openBtn" target="funboxDraw" rel="noopener">🔗 開啟這抽</a>
+    </div>
+  </div>
+  <div class="actions-row">
+    <button class="btn-secondary" id="skipBtn">⏭ 跳過，不標記</button>
+    <button class="btn-secondary" id="backBtn">↩ 上一抽</button>
+  </div>
+
+  <div class="directory">
+    <h2>完整店家清單</h2>
+    <div class="directory-tools">
+      <input type="text" id="searchBox" class="search-input" placeholder="搜尋門市或商品名稱">
+      <label class="hide-drawn-label">
+        <input type="checkbox" id="hideDrawnToggle">
+        隱藏已抽過
+      </label>
+    </div>
+    <div id="directoryRoot"></div>
+  </div>
+
+  <footer>
+    10/8 10/9 檔期・資料整理自各店官方 LINE 抽選連結。
+  </footer>
+</div>
+
+<script id="draw-data" type="application/json">[{"city":"台北市","name":"來玩聚-台北地下街店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/zeX9rFj"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/Q9ORhFq"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/7X64Bom"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/6bljgMGP"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/Pz7VcRY"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/88OtBaa"},{"product":"UX-19 子彈獅鷲H","url":"https://lin.ee/uqV4FrTT"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/zsanpb7"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/Y1ohYMy"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/qh4pQh4"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/yw6K6rj"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/Xx0Q2m2"},{"product":"CX-11 帝王威能","url":"https://lin.ee/SYciRNj"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/5lijbEE"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/yLnjMJx"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/rYAras0"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/nsuP5hR"}]},{"city":"台北市","name":"Funbox 遠百信義A13店","products":[{"product":"UX-13 魔像奇岩","url":"https://lin.ee/oE1iSeG"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/sXXU1ls"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/UHzXf8U"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/OhyzpSG"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/9MIaMHj"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/oW0QNVU"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/9HYEHY0"}]},{"city":"台北市","name":"Funbox 新光三越站前店","products":[{"product":"UX-03 魔導神杖","url":"https://lin.ee/oJulAO6"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/nXrKCAI"},{"product":"UX-19 子彈獅鷲","url":"https://lin.ee/rxjmMb4"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/5saSA6r"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/sIuem9x"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/zGiC84W"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/nsZ79zb"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/ZIhzBi0"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/qHPJ7wO"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/SA9oRXnn"},{"product":"CX-17 隨機強化組 Vol.10","url":"https://lin.ee/yFQHFqj"}]},{"city":"台北市","name":"Funbox 台北大巨蛋店","products":[{"product":"BX-00 暴風天馬3-70RA","url":"https://lin.ee/N7NJGZy"},{"product":"BX-06 騎士重盾 (蒼藍)","url":"https://lin.ee/vOrQYCI"},{"product":"BX-20 蒼龍利刃改造組","url":"https://lin.ee/Nwum179"},{"product":"BX-49 蒼龍突擊","url":"https://lin.ee/8LGKQv0"},{"product":"CX-09 焰神滅世","url":"https://lin.ee/69scjuh"},{"product":"CX-10 銀狼狩獵","url":"https://lin.ee/P0m4dwx"},{"product":"BXG-20 巨岩雄獅","url":"https://lin.ee/QvMCNEU"},{"product":"BXG-21 暴風巨神","url":"https://lin.ee/9DLrPH9"}]},{"city":"台北市","name":"Funbox 南港潤泰店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/q0fdifO"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/oFxZg7k"},{"product":"UX-14 天蠍長矛","url":"https://lin.ee/Zd8hxBE"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/xhdtH03"},{"product":"UX-17 隕星龍騎士（左迴旋）","url":"https://lin.ee/Q43LDso"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/Of3Hu1R"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/wXy5bI8"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/p4DhyHX"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/vwKM43g"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/o8BA92o"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/QOq1Fye"},{"product":"BXG-01 烈焰飛鳳S","url":"https://lin.ee/NdJHy3z"}]},{"city":"台北市","name":"Funbox 天母SOGO店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/vTGFsov"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/vMV5cgj"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/5cD9JpE"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/Wc13vwX"},{"product":"UX-16 時鐘幻象 隨機強化組（此券可購買數量2個）","url":"https://lin.ee/xWxZf48"},{"product":"UX-17 隕星龍騎士","url":"https://lin.ee/safxb1Q"},{"product":"UX-19 子彈獅鷲","url":"https://lin.ee/X54aPph"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/NSZxYPf"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/PNElaT9"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/Y1orMbn"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/xcvssQV"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/YXTKLCk"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/xqpXSej"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/qYAOOPT"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/6KRlj3m"},{"product":"CX-17 隨機強化組 Vol.10（此券可購買數量1個）","url":"https://lin.ee/vL3fOFD"},{"product":"CX-19 鱷魚裂甲","url":"https://lin.ee/7whQVNT"}]},{"city":"台北市","name":"Funbox 高島屋百貨店","products":[{"product":"BX-00 蒼龍神劍3-60F V2","url":"https://lin.ee/ZcpXMwD"},{"product":"BX-26 獨角刺心","url":"https://lin.ee/TnT1Q8y"},{"product":"BX-33 皓戰猛虎","url":"https://lin.ee/xbTMiYX"},{"product":"UX-02 惡魔戰錘","url":"https://lin.ee/9mbfZNm"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/sK4uc9ci"},{"product":"UX-15 鮫鯊狂鱗改造組","url":"https://lin.ee/Z2M5usd"},{"product":"UX-19 子彈獅鷲H","url":"https://lin.ee/TVSrIvz"},{"product":"UX-21 惡魔冥界改造組","url":"https://lin.ee/ZCzF45M"},{"product":"CX-00 迪卡狂怒 FT3-60T","url":"https://lin.ee/RGfh49z"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/5yc9FNq"},{"product":"CX-11 帝王威能","url":"https://lin.ee/VKJdOmE"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/R02V80U"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/6rBqgPB"}]},{"city":"台北市","name":"Funbox 信義A8店","products":[{"product":"CX-02 魔導至尊","url":"https://lin.ee/sfpdfuX"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/9UMj5ZR"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/Vs1Pq8n"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/nZ2kqWr"}]},{"city":"台北市","name":"Funbox 天母三越店","products":[{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/9vXi7ND"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/PCN6QRjF"},{"product":"UX-19 子彈獅鷲","url":"https://lin.ee/PX7RP3l"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/wwl7I4e"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/tx7s6eX"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/51bHxeP"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/NlAXaHG"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/7ztBG3Z"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/SnAzEbE"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/vvHtV5g"},{"product":"CX-16 極限對戰組C","url":"https://lin.ee/VzEJs3C"},{"product":"BXG-04 銀牙烈虎S","url":"https://lin.ee/PmQfKEG"}]},{"city":"台北市","name":"Funbox 台北忠孝遠東SOGO店","products":[{"product":"UX-13 魔像奇岩","url":"https://lin.ee/wFnUMJ5"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/59NvSZt"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/56qBoLb"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/RAnaJVU"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/nsjDe1W"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/qYOw81c"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/55kl4iJD"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/6t5vsWN"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/96rBtTr"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/RZwr8O0"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/pYZj1t5"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/ZjoxcyM"}]},{"city":"台北市","name":"Funbox 美麗華店","products":[{"product":"UX-03 魔導神杖","url":"https://lin.ee/xRyPh5o"},{"product":"UX-14 天蠍長矛","url":"https://lin.ee/NjSYAdr"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/YPVp5YQ"},{"product":"CX-05 惡魔獵魂抽包","url":"https://lin.ee/nfqOfDR"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/rw1YbRb"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/rNHeGdg"}]},{"city":"新北市","name":"Funbox 板橋大遠百店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/9XBbodB"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/P2isAld"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/VukavmY"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/RX60tVD"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/s7nsRaT"}]},{"city":"新北市","name":"Funbox 樹林秀泰店","products":[{"product":"BX-09 戰鬥陀螺X通行證","url":"https://lin.ee/xQzTBxs"},{"product":"BX-37 雙重極限衝擊戰鬥盤 豪華組","url":"https://lin.ee/zEQOoIwh"},{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/NEsU899"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/PlpDb94"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/XERO49F"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/SeEoPDH"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/NASBQT0"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/7hmvx3g"},{"product":"UX-19 子彈獅鷲","url":"https://lin.ee/XxKUmGU"},{"product":"UX-20 榮耀武神","url":"https://lin.ee/ymKurCK"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/X0XRNCs"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/nn9EqMf"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/yE3YnY8"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/Os7IV1L"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/WGw7dLQ"},{"product":"CX-08 隨機強化組Vol.7","url":"https://lin.ee/PUDgu4H"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/YMWNO4M"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/Pk7LZpq"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/zhVlSzD"},{"product":"CX-16 極限衝擊對戰組","url":"https://lin.ee/VKEiKc8"},{"product":"CX-19 鱷魚裂甲","url":"https://lin.ee/xnPvW0Q"}]},{"city":"新北市","name":"Funbox 中和環球店","products":[{"product":"UX-03 魔導神杖","url":"https://lin.ee/zeWlxw2"},{"product":"UX-17 隕星龍騎士","url":"https://lin.ee/NxC8NHi"},{"product":"CX-00 迪卡狂怒 FT3-60T","url":"https://lin.ee/nZ1Rfba"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/yEfasgY"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/Znk0hJI"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/Td8aYN0"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/Wylosa8"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/67Kf4AY"}]},{"city":"新北市","name":"Funbox 新店誠品店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/ncrRm4y"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/nomu09wu"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/8sF3etc4"},{"product":"UX-14 天蠍長矛","url":"https://lin.ee/Xvk6QOo"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/oTuNZ5lj"},{"product":"UX-17 隕星龍騎士","url":"https://lin.ee/5ORXW59"},{"product":"UX-19 子彈獅鷲","url":"https://lin.ee/rafcxQi"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/slFwglr"},{"product":"CX-00 超人力霸王迪卡聯名款","url":"https://lin.ee/7yFPvvL"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/sW1wC8j"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/TKm7T43"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/8AFQwIp"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/NjDH0Dn"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/PJwRcbP"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/WvSmM03"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/zG1pmiv"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/Yc5bBXC"},{"product":"CX-17 隨機強化組 Vol.10","url":"https://lin.ee/RUxh938t"}]},{"city":"新北市","name":"Funbox 淡水禮萊廣場店","products":[{"product":"BX-00 蒼龍神劍3-60F V2","url":"https://lin.ee/7Zblz33"},{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/uZM9AgC"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/y6d643D"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/Q93LFri"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/6SAGVYP"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/Xsb0LYw"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/WCoSJhO"},{"product":"UX-19 子彈獅鷲H","url":"https://lin.ee/X4xq9u3"},{"product":"UX-20 榮耀武神LF","url":"https://lin.ee/8FzyTPF"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/rMTN8Ks"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/6MaRhiV"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/WblHzFS"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/zVfdoRF"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/rzAhkxQ"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/PR6WbvM"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/UmVf98q"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/wC8i0Pk"}]},{"city":"新北市","name":"Funbox 汐科遠雄","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/rUiiegu"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/pq2JhoE"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/POBQmLq"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/6zFubMS"},{"product":"UX-17 隕星龍騎士","url":"https://lin.ee/rzIBDmG"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/nidJfs6"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/xYsLqWB"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/5SINm2O"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/vEzFSGPr"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/Wd41tjA"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/xoEzR9N"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/nAoNVf4"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/XGhxoOz"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/soFZDow"},{"product":"CX-19 鱷魚裂甲 隨機強化組（此商品庫存1 抽到只能買1）","url":"https://lin.ee/9vWsiMn"}]},{"city":"新北市","name":"Funbox 板橋遠東","products":[{"product":"UX-03 魔導神杖","url":"https://lin.ee/pYJ2Wse"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/NoKYJOW"},{"product":"UX-19 子彈獅鷲H","url":"https://lin.ee/7CMdwmi"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/5HkTpXZ"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/SynEpvL"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/5dHZbEj"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/ZdtCx2q"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/X0zgJPo"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/TYZ8Zdy"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/uFWDkVN"}]},{"city":"新竹市","name":"Funbox 新竹遠東店","products":[{"product":"BX-09 戰鬥陀螺X通行證","url":"https://lin.ee/xQzTBxs"},{"product":"BX-37 雙重極限衝擊戰鬥盤 豪華組","url":"https://lin.ee/zEQOoIwh"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/6mEByIU"},{"product":"UX-15 鮫鯊狂鱗改造組","url":"https://lin.ee/rzMAyhB"},{"product":"UX-19 子彈獅鷲H","url":"https://lin.ee/W8AGvkC"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/n4jETfe"},{"product":"CX-11 帝王威能","url":"https://lin.ee/rJ8xpBH"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/NRPDRBU"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/xfVYwQ2"},{"product":"CX-19 鱷魚裂甲 隨機強化組","url":"https://lin.ee/TUwp9Sy"}]},{"city":"新竹市","name":"Fun Box 新竹巨城","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/53miLvO"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/yZJDfOT"},{"product":"UX-16 時鐘幻象","url":"https://lin.ee/relMMti"},{"product":"UX-17 隕星龍騎士","url":"https://lin.ee/rTxMbZ8"},{"product":"UX-19 子彈獅鷲","url":"https://lin.ee/pgmPWrs"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/xjcmGab"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/n4uNRwX"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/YpIIui5"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/OSqFOys"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/7V47Yqy"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/pQpXT9Q"},{"product":"CX-11 帝王威能","url":"https://lin.ee/prJgxlw"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/7cg9zPq"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/yVZVLhv"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/ZuCj6rC"},{"product":"CX-17 隨機強化組 Vol.10","url":"https://lin.ee/VgeYT1sD"}]},{"city":"新竹縣","name":"Funbox 竹北遠東店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/VOySukH"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/rzJInCiy"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/w1DpBBC"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/UlFzKwr"},{"product":"UX-15 鮫鯊狂鱗改造組","url":"https://lin.ee/RmDHTFp"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/Z6WipGt"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/65BbhMAd"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/TuirXUk"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/WnuCiISq"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/ODTrbRT"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/7VoNQlo"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/yJVwwfL"},{"product":"CX-11 帝王威能","url":"https://lin.ee/w4v7Ak0"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/R9FTEfQ"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/OgMOlmU"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/sqVivvg"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/VoyX9Uy"},{"product":"BXG-01 烈焰飛鳳S","url":"https://lin.ee/Zox1Tga"}]},{"city":"台中市","name":"Funbox 台中中友店","products":[{"product":"UX-13 魔像奇岩","url":"https://lin.ee/z7eMRZTC"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/PhAqCPy"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/QDOYzP0"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/tcdEMug"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/r4BCaMP3"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/X6J21gu"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/ubnXfBk"}]},{"city":"台中市","name":"Funbox 台中港三井店","products":[{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/p2JpYdB"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/8OMrFV3"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/Q2l1DBQ"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/RW4JXbB"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/nSWeRAs"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/Rmo1tWK"}]},{"city":"台中市","name":"Funbox 廣三SOGO店","products":[{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/oFmM2jQ"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/Xs9i1fk"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/VFGBzz7"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/TmgOuVy"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/xVMdipI"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/9ZSeaxX"},{"product":"CX-11 帝王威能","url":"https://lin.ee/9iXuu0l"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/TNHQRkk"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/6CqgJzT"}]},{"city":"台中市","name":"Funbox 新光三越台中中港店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/nxnXe3e"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/pPwlhpE5"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/rqC9OkZ"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/8cvNvvn"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/x1i8K5O"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/vMQBosh"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/Rak8NNK"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/uaciMVvD"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/wNkIWit"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/51LC82h"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/xY3fCB2"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/83TWsvq"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/YCJACRT"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/r5eiFub"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/7A1V1UE"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/nlZZtff"}]},{"city":"嘉義市","name":"Funbox 嘉義遠東店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/nA8H64R"},{"product":"UX-13 磨像奇岩","url":"https://lin.ee/yb7fFFm"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/W4a6Wqe"},{"product":"UX-15 鮫殺狂鱗改造組","url":"https://lin.ee/z7hfuTF"},{"product":"UX-16 時鐘幻象隨機強化組","url":"https://lin.ee/ZqD2IYF"},{"product":"UX-19 子彈獅鷲H","url":"https://lin.ee/zQ2CGee"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/xqVfJOG"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/xf010Yl"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/V1MiopM"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/xF0TRn8"},{"product":"CX-11 帝王威能","url":"https://lin.ee/5zQFKWI"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/ZwT2Xw9"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/VstcTgi"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/uVJs4Pl"},{"product":"CX-16 極限衝擊對戰組","url":"https://lin.ee/oeQkCOj"}]},{"city":"雲林縣","name":"來玩聚-斗六店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/qBve9j4"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/REvNoaG"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/vmjYBmQ"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/zlgIDqM"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/qiiUGRk"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/PIxxYHP"},{"product":"UX-19 子彈獅鷲H","url":"https://lin.ee/urSPDAH"},{"product":"UX-20 榮耀武神LF","url":"https://lin.ee/7DdRKaG"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/R0kQyNs"},{"product":"CX-00 迪卡狂怒 FT3-60T","url":"https://lin.ee/tha80Li"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/xqSos7N"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/P04oGozj"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/p4ccVa2"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/ZBajeis"},{"product":"CX-11帝王威能","url":"https://lin.ee/pBMGsul"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/O8qqPO6"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/6e42ABR"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/YgEG7raU"}]},{"city":"台南市","name":"Funbox 台南三井店","products":[{"product":"CX-03 英仙幽冥","url":"https://lin.ee/QQHUMM3"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/oMvEZQn"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/tbcHsFY"}]},{"city":"台南市","name":"Funbox 南紡購物中心","products":[{"product":"UX-14 天蠍長矛","url":"https://lin.ee/sEN6Cq2"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/YacrvCc"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/NxzkZNYv"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/w8jrA39"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/Pr6ilCT"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/NkOo9bP"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/SWC3nJc"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/Qh7HPLo"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/vmArZwQ"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/zi2AAF1C"},{"product":"CX-17 隨機強化組 Vol.10","url":"https://lin.ee/puDN3cn"}]},{"city":"台南市","name":"Funbox 台南西門","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/6dj85Sg"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/626FxVl"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/NnNTXTT"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/XpcYvUV"},{"product":"UX-17 隕星龍騎士","url":"https://lin.ee/NC2Ks8Y"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/wCBFBJd"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/VGal8OV"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/nKNqr8k"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/6TsHV6o"},{"product":"CX-05 惡魔獵魂 隨機強化組","url":"https://lin.ee/7UcXqIY"},{"product":"CX-08 魔犬烈焰 隨機強化組","url":"https://lin.ee/62KaBWY"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/UdddZSp"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/9fRGYWX"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/vzMvsG7"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/oNzi6ay4"}]},{"city":"高雄市","name":"Funbox 漢神巨蛋店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/RSwVjEG"},{"product":"UX-03 魔導神杖","url":"https://lin.ee/O3ilb0o"},{"product":"UX-15 邪神狂怒","url":"https://lin.ee/nAtp8FG"},{"product":"UX-17 隕星龍騎士","url":"https://lin.ee/8bZAXSw"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/PBPs2Fe"}]},{"city":"高雄市","name":"Funbox 高雄漢神店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/6f0ugqD"},{"product":"UX-15 鮫鯊狂鱗改造組","url":"https://lin.ee/suXnYQf"},{"product":"UX-16 抽包","url":"https://lin.ee/8owp6OH"},{"product":"UX-20 榮耀武神","url":"https://lin.ee/XOMEcwe"},{"product":"CX-00 福音戰士改造組","url":"https://lin.ee/R56KO2Z"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/tx7lDbN"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/wsDrV9oR"},{"product":"CX-05 抽包","url":"https://lin.ee/UB4i6Ku"},{"product":"CX-08 抽包","url":"https://lin.ee/saBn7sJ"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/8Gza00g"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/rcaTs8W"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/61S32QT"}]},{"city":"高雄市","name":"Funbox 高雄大立店","products":[{"product":"UX-13 魔像奇岩","url":"https://lin.ee/u0B67V9"},{"product":"UX-14 天蠍長矛","url":"https://lin.ee/W9fP2ZY"},{"product":"UX-20 榮耀武神","url":"https://lin.ee/uG0H6ADJ"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/t9F0ZCv"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/OTE21vf"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/oU6vhBb"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/PceaQqk"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/n7PE8i8"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/s2ZmeCi"}]},{"city":"高雄市","name":"Funbox 夢時代店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/PdDmgK6"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/pvbOOKD"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/zaxXyi5"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/SGuqhah"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/U8gm8rs"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/s6OCTWh"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/5X3fQuX"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/zBj0aeWb"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/OvkSlVCW"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/o1WbgYqr"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/ZxtWkaz"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/zxStgCd"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/pAlTOBR"},{"product":"CX-17 隨機強化組 Vol.10","url":"https://lin.ee/NbyrkUgs"}]},{"city":"高雄市","name":"Funbox 大魯閣新光店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/O5dcEiGN"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/VsMutB1"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/nwb7ZvH"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/sP1XxJD"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/8v2FpO0"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/wQIvvch"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/Yc103HY"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/QkFG2oB"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/V0GHb1k"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/yKdg1T1"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/twdrT3t"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/uo7nJNt"}]},{"city":"高雄市","name":"Funbox 崇光高雄店","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/WQrzVgH"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/PxOl6Mm"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/V1F51Td"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/vK6mLtt"},{"product":"CX-00 新世紀福音戰士改造組","url":"https://lin.ee/OQ4hgdA"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/vAcWddkt"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/ndjXyGa"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/Sgx7CRh"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/ymRMvTC"}]},{"city":"高雄市","name":"Funbox 高雄大遠百店","products":[{"product":"UX-03 魔導神杖","url":"https://lin.ee/PGNhu2z"},{"product":"UX-15 鮫鯊狂鱗改造組","url":"https://lin.ee/z3p8Ns4"},{"product":"UX-20 榮耀武神","url":"https://lin.ee/uvSgfSZ"},{"product":"CX-11 帝王威能改造組 ‼","url":"https://lin.ee/QL88Bzh"}]},{"city":"高雄市","name":"來玩聚-新楠家樂福","products":[{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/q4yvCBr"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/y3GcQqv"},{"product":"UX-14 天蠍長矛0-70","url":"https://lin.ee/uUiXVLr"},{"product":"UX-19 子彈獅鷲H","url":"https://lin.ee/Yyol5mD"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/QtmLmMgD"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/WWLSR5C"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/5mCaSFw"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/SX58yBd"},{"product":"BXG-04 銀牙烈虎S","url":"https://lin.ee/T9XzxHE"}]},{"city":"高雄市","name":"來玩聚-楠梓家樂福","products":[{"product":"CX-08 隨機強化組","url":"https://lin.ee/Xsi1PwB"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/tJiNDX3"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/SDPJXo8"},{"product":"UX-01 蒼龍爆刃","url":"https://lin.ee/z151d6K"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/yYbM8AM"},{"product":"UX-17 隕星龍騎士","url":"https://lin.ee/oFWeDsT"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/tzvAn82"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/s7qKGYs"},{"product":"UX-14 天蠍長矛","url":"https://lin.ee/VRkixSh"}]},{"city":"屏東縣","name":"來玩聚-新屏店","products":[{"product":"UX-13 魔像奇岩","url":"https://lin.ee/PlmtM18"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/ZlwDYpU"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/tmSMZmg"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/Wf8uteB"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/55WY3Re"},{"product":"CX-05 隨機強化組 Vol.6","url":"https://lin.ee/5xGSjwb"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/r2F12eV"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/shGHnJ4"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/UjoNAQ0"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/nrg6ffb"}]},{"city":"屏東縣","name":"Funbox 屏東太平洋店","products":[{"product":"UX-13 魔像奇岩","url":"https://lin.ee/OtJQlsn"},{"product":"UX-14 天蠍長矛0-70Z","url":"https://lin.ee/5XL03Rg"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/QG9SbrgV"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/vSNoJvz"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/v88UqX9"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/qBRvYwl"},{"product":"CX-11 帝王威能","url":"https://lin.ee/xlLNdyq"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/uScoofB7"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/XSjzN4H"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/yy9hutX"},{"product":"CX-16 極限衝擊對戰組C","url":"https://lin.ee/TJOQPcG"},{"product":"CX-17 隨機強化組 Vol.10","url":"https://lin.ee/SvzWemF"}]},{"city":"宜蘭縣","name":"Funbox 宜蘭新月廣場店","products":[{"product":"UX-03 魔導神杖","url":"https://lin.ee/zXdC7xY"},{"product":"UX-13 魔像奇岩","url":"https://lin.ee/TJOfGgU"},{"product":"UX-16 時鐘幻象 隨機強化組","url":"https://lin.ee/vbA9YEm"},{"product":"UX-17 隕星龍騎士3-70J","url":"https://lin.ee/TLMWH8n"},{"product":"CX-01 蒼龍勇氣","url":"https://lin.ee/YN9bxke"},{"product":"CX-02 魔導至尊","url":"https://lin.ee/5N914Ay"},{"product":"CX-03 英仙幽冥","url":"https://lin.ee/YmWwBAq"},{"product":"CX-08 隨機強化組 Vol.7","url":"https://lin.ee/tPYQjo7"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/uD0djjc"},{"product":"CX-14 騎士堡壘","url":"https://lin.ee/Y0HCABd"},{"product":"CX-15 邪神狂怒","url":"https://lin.ee/YOOhukN"}]},{"city":"澎湖縣","name":"Funbox 澎湖3號港店","products":[{"product":"BX-00 蒼龍神劍3-60F V2","url":"https://lin.ee/WYUiS2fV"},{"product":"BX-00 暴風天馬3-70RA","url":"https://lin.ee/QDubEC5"},{"product":"UX-21 惡魔冥界改造組","url":"https://lin.ee/RWpyBQu"},{"product":"CX-00 迪卡狂怒 FT3-60T","url":"https://lin.ee/o9dkuJ0"},{"product":"CX-13 龍王閃擊","url":"https://lin.ee/W9qLf9v"}]}]</script>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORES = JSON.parse(document.getElementById("draw-data").textContent);
+  var DRAWN_KEY = "funbox_draw_drawn_v1";
+  var POS_KEY = "funbox_draw_pos_v1";
+
+  function getCode(product) {
+    var m = product.match(/^(\S+)/);
+    return m ? m[1] : product;
+  }
+
+  // Flatten into a single ordered queue of draws.
+  var ALL = [];
+  STORES.forEach(function (store) {
+    store.products.forEach(function (p) {
+      var m = p.product.match(/^(.*?)（\$([\d,]+)）\s*$/);
+      var name = m ? m[1] : p.product;
+      var price = m ? m[2] : "";
+      ALL.push({
+        city: store.city,
+        store: store.name,
+        product: name,
+        code: getCode(name),
+        price: price,
+        url: p.url
+      });
+    });
+  });
+
+  var cities = [];
+  ALL.forEach(function (d) { if (cities.indexOf(d.city) === -1) cities.push(d.city); });
+
+  var itemCodes = [];
+  ALL.forEach(function (d) { if (itemCodes.indexOf(d.code) === -1) itemCodes.push(d.code); });
+  itemCodes.sort();
+
+  function readJson(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key) || "null") || fallback; }
+    catch (e) { return fallback; }
+  }
+  function writeJson(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  }
+
+  var drawn = readJson(DRAWN_KEY, {});
+  // Empty set == no filter on that dimension (show everything).
+  var state = { cities: new Set(), items: new Set(), pos: 0 };
+  var directoryQuery = "";
+  var hideDrawn = false;
+  var savedPos = readJson(POS_KEY, null);
+  if (savedPos && typeof savedPos.pos === "number") state.pos = savedPos.pos;
+
+  function matchesFilter(d) {
+    if (state.cities.size && !state.cities.has(d.city)) return false;
+    if (state.items.size && !state.items.has(d.code)) return false;
+    return true;
+  }
+
+  function currentQueue() {
+    return ALL.filter(matchesFilter);
+  }
+
+  function clampPos(queue) {
+    if (queue.length === 0) return 0;
+    if (state.pos >= queue.length) state.pos = queue.length - 1;
+    if (state.pos < 0) state.pos = 0;
+    return state.pos;
+  }
+
+  function persistPos() {
+    writeJson(POS_KEY, { pos: state.pos });
+  }
+
+  // ---------- Header chips (multi-select: a set of chips per dimension,
+  // plus a leading "全部" chip that clears that dimension's set) ----------
+  function buildMultiSelectGroup(container, allLabel, options, selectionSet, countFn) {
+    container.innerHTML = "";
+
+    var allBtn = document.createElement("button");
+    allBtn.className = "chip";
+    allBtn.type = "button";
+    allBtn.textContent = allLabel + " (" + countFn(null) + ")";
+    allBtn.addEventListener("click", function () {
+      selectionSet.clear();
+      state.pos = 0;
+      render();
+    });
+    container.appendChild(allBtn);
+
+    options.forEach(function (opt) {
+      var btn = document.createElement("button");
+      btn.className = "chip only-ux21";
+      btn.type = "button";
+      btn.textContent = opt + " (" + countFn(opt) + ")";
+      btn.addEventListener("click", function () {
+        if (selectionSet.has(opt)) selectionSet.delete(opt);
+        else selectionSet.add(opt);
+        state.pos = 0;
+        render();
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  var cityFilters = document.getElementById("cityFilters");
+  function cityCount(city) {
+    return ALL.filter(function (d) { return city === null ? true : d.city === city; }).length;
+  }
+  function buildChips() {
+    buildMultiSelectGroup(cityFilters, "全部縣市", cities, state.cities, cityCount);
+  }
+
+  var itemFilters = document.getElementById("itemFilters");
+  function itemCount(code) {
+    return ALL.filter(function (d) { return code === null ? true : d.code === code; }).length;
+  }
+  function buildItemChips() {
+    buildMultiSelectGroup(itemFilters, "全部品項", itemCodes, state.items, itemCount);
+  }
+
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    if (!confirm("確定要清除所有已開的標記與進度嗎？")) return;
+    drawn = {};
+    writeJson(DRAWN_KEY, drawn);
+    state.pos = 0;
+    render();
+    buildDirectory();
+  });
+
+  document.getElementById("skipBtn").addEventListener("click", function () {
+    var q = currentQueue();
+    if (state.pos < q.length - 1) state.pos++;
+    persistPos();
+    render();
+  });
+
+  document.getElementById("backBtn").addEventListener("click", function () {
+    if (state.pos > 0) state.pos--;
+    persistPos();
+    render();
+  });
+
+  var openBtn = document.getElementById("openBtn");
+  openBtn.addEventListener("click", function () {
+    var q = currentQueue();
+    var idx = clampPos(q);
+    var d = q[idx];
+    if (!d) return;
+    markDrawn(d.url, true);
+    if (idx < q.length - 1) state.pos = idx + 1;
+    persistPos();
+    setTimeout(function () { render(); buildDirectory(); }, 30);
+  });
+
+  function renderTicket() {
+    var q = currentQueue();
+    var idx = clampPos(q);
+    var d = q[idx];
+    var region = document.getElementById("curRegion");
+    var storeEl = document.getElementById("curStore");
+    var productEl = document.getElementById("curProduct");
+    var idxEl = document.getElementById("curIndex");
+
+    if (!d) {
+      region.textContent = "—";
+      storeEl.textContent = "這個篩選條件下沒有項目";
+      productEl.textContent = "";
+      idxEl.textContent = "–";
+      openBtn.removeAttribute("href");
+      openBtn.setAttribute("aria-disabled", "true");
+      return;
+    }
+
+    region.textContent = d.city + " · " + d.store;
+    storeEl.textContent = d.product;
+    productEl.innerHTML = d.price ? ("售價 <span class=\"ticket-price\">$" + d.price + "</span>" + (drawn[d.url] ? " · 已標記開過" : "")) : (drawn[d.url] ? "已標記開過" : "");
+    idxEl.textContent = (idx + 1) + " / " + q.length;
+    openBtn.href = d.url;
+    openBtn.removeAttribute("aria-disabled");
+  }
+
+  function renderProgress() {
+    var totalDrawnGlobal = Object.keys(drawn).filter(function (u) {
+      return ALL.some(function (d) { return d.url === u; });
+    }).length;
+    document.getElementById("drawnCount").textContent = totalDrawnGlobal;
+    document.getElementById("totalCount").textContent = ALL.length;
+    var pct = ALL.length ? Math.round((totalDrawnGlobal / ALL.length) * 100) : 0;
+    document.getElementById("progressFill").style.width = pct + "%";
+    var cityLabel = state.cities.size ? Array.from(state.cities).join("、") : "全部縣市";
+    var itemLabel = state.items.size ? " · " + Array.from(state.items).join("、") : "";
+    document.getElementById("filterLabel").textContent = cityLabel + itemLabel;
+  }
+
+  function renderChipsState() {
+    Array.prototype.forEach.call(cityFilters.children, function (chip, i) {
+      chip.setAttribute("aria-pressed", i === 0 ? (state.cities.size === 0 ? "true" : "false") : (state.cities.has(cities[i - 1]) ? "true" : "false"));
+    });
+    Array.prototype.forEach.call(itemFilters.children, function (chip, i) {
+      chip.setAttribute("aria-pressed", i === 0 ? (state.items.size === 0 ? "true" : "false") : (state.items.has(itemCodes[i - 1]) ? "true" : "false"));
+    });
+  }
+
+  var directoryRoot = document.getElementById("directoryRoot");
+
+  function markDrawn(url, checked) {
+    if (checked) drawn[url] = true; else delete drawn[url];
+    writeJson(DRAWN_KEY, drawn);
+  }
+
+  function advanceQueueTo(url) {
+    var q = currentQueue();
+    var qIdx = q.findIndex(function (d) { return d.url === url; });
+    if (qIdx !== -1 && qIdx < q.length - 1) state.pos = qIdx + 1;
+    persistPos();
+  }
+
+  function buildDirectory() {
+    directoryRoot.innerHTML = "";
+    var q = directoryQuery.trim().toLowerCase();
+
+    cities.forEach(function (city) {
+      var storesInCity = STORES.filter(function (s) { return s.city === city; });
+      var cityBlocks = [];
+      var cityTotalItems = 0;
+
+      storesInCity.forEach(function (store) {
+        var storeNameMatches = !q || store.name.toLowerCase().indexOf(q) !== -1;
+        var visibleProducts = store.products.filter(function (p) {
+          if (hideDrawn && drawn[p.url]) return false;
+          if (!q) return true;
+          return storeNameMatches || p.product.toLowerCase().indexOf(q) !== -1;
+        });
+        if (!visibleProducts.length) return;
+        cityBlocks.push({ store: store, products: visibleProducts });
+        cityTotalItems += visibleProducts.length;
+      });
+
+      if (!cityBlocks.length) return;
+
+      var cityDetails = document.createElement("details");
+      cityDetails.className = "city";
+      cityDetails.open = !!q;
+      var summary = document.createElement("summary");
+      summary.innerHTML = "<span>" + city + "</span><span class=\"city-meta\">" + cityBlocks.length + " 店・" + cityTotalItems + " 抽</span>";
+      cityDetails.appendChild(summary);
+
+      var body = document.createElement("div");
+      body.className = "city-body";
+
+      cityBlocks.forEach(function (block) {
+        var store = block.store;
+        var storeDetails = document.createElement("details");
+        storeDetails.className = "store";
+        storeDetails.open = !!q;
+        var sSummary = document.createElement("summary");
+        sSummary.innerHTML = "<span>" + store.name + "</span><span class=\"store-meta\">" + block.products.length + " 抽</span>";
+        storeDetails.appendChild(sSummary);
+
+        var ul = document.createElement("ul");
+        ul.className = "items";
+        block.products.forEach(function (p) {
+          var m = p.product.match(/^(.*?)（\$([\d,]+)）\s*$/);
+          var name = m ? m[1] : p.product;
+          var price = m ? m[2] : "";
+          var isDrawn = !!drawn[p.url];
+          var li = document.createElement("li");
+          if (isDrawn) li.className = "drawn";
+
+          var check = document.createElement("input");
+          check.type = "checkbox";
+          check.className = "row-check";
+          check.checked = isDrawn;
+          check.title = "標記為已抽過";
+          check.addEventListener("change", function () {
+            markDrawn(p.url, check.checked);
+            setTimeout(function () { render(); buildDirectory(); }, 30);
+          });
+
+          var label = document.createElement("span");
+          label.className = "row-label";
+          label.textContent = name;
+
+          var btn = document.createElement("a");
+          btn.className = "row-draw-btn";
+          btn.href = p.url;
+          btn.target = "funboxDraw";
+          btn.rel = "noopener";
+          btn.textContent = "單抽";
+          btn.addEventListener("click", function () {
+            markDrawn(p.url, true);
+            advanceQueueTo(p.url);
+            setTimeout(function () { render(); buildDirectory(); }, 30);
+          });
+
+          li.appendChild(check);
+          li.appendChild(label);
+          if (price) {
+            var priceEl = document.createElement("span");
+            priceEl.className = "row-price";
+            priceEl.textContent = "$" + price;
+            li.appendChild(priceEl);
+          }
+          li.appendChild(btn);
+          ul.appendChild(li);
+        });
+        storeDetails.appendChild(ul);
+        body.appendChild(storeDetails);
+      });
+
+      cityDetails.appendChild(body);
+      directoryRoot.appendChild(cityDetails);
+    });
+
+    if (!directoryRoot.children.length) {
+      var empty = document.createElement("p");
+      empty.className = "ticket-empty";
+      empty.textContent = hideDrawn ? "都已經抽過了（或搜尋不到符合的項目）" : "搜尋不到符合的門市或商品";
+      directoryRoot.appendChild(empty);
+    }
+  }
+
+  document.getElementById("searchBox").addEventListener("input", function (e) {
+    directoryQuery = e.target.value;
+    buildDirectory();
+  });
+
+  document.getElementById("hideDrawnToggle").addEventListener("change", function (e) {
+    hideDrawn = e.target.checked;
+    buildDirectory();
+  });
+
+  function render() {
+    renderChipsState();
+    renderTicket();
+    renderProgress();
+  }
+
+  buildChips();
+  buildItemChips();
+  buildDirectory();
+  render();
+})();
+</script>
+
+
+
+</body>
+</html>
